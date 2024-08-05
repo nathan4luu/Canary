@@ -1,5 +1,6 @@
 # Canary
 ## Whistleblowing project for CS 3240: Software Engineering
+### Created in collaboration with Tao Groves, Jimmy Draudt, Ilia Khalighi, and Leo Howerdd
 
 For our project, we created a whistleblower application, Canary. Our application allows users to create and join communities in which members can report pertinent information, along with evidence in the form of .txt, .pdf, or .jpg files. To simulate the software development process and apply best practices, we followed the stages of requirements elicitation, design, implementation, testing, and kept maintenance in mind when creating the application, while implementing agile methods throughout. Over the course of the semester, we depended on effective and efficient communication to assign tasks, monitor each other’s progress, and tackle technical challenges collectively. To address interpersonal challenges, we considered everyone's diverse schedules both in and out of classes, varying skill levels, and differing viewpoints. As a result, we successfully created Canary, featuring a user-friendly interface and crucial functions for reporting securely and confidently. Our group feels that this project has taught each of us so much—both technically and collaboratively—and we’re extremely proud of what we’ve accomplished with Canary.
 
