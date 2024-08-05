@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load allauth account %}
+
+{% block head_title %}
+    {% trans "Sign In" %}
+{% endblock head_title %}
+
+{% block content %}
+<div class="bg-gray-900 mt-4 flex items-center justify-center">
+  <div class="w-full max-w-md bg-gray-800 shadow-md rounded-lg overflow-hidden">
+    <div class="px-8 py-6">
+      <h2 class="text-2xl font-bold text-gray-100 mb-4 text-center">{% trans "Login" %}</h2>
+      <form method="post" action="{% url 'account_login' %}?next={{ request.path }}" class="entrance login">
+        {% csrf_token %}
+        {% for field in form.visible_fields %}
+        <div class="mb-4">
+          <label for="{{ field.id_for_label }}" class="block text-gray-300 font-bold mb-2">{{ field.label }}:</label>
+          <div class="mt-1 relative rounded-md">
+            <input id="{{ field.id_for_label }}" name="{{ field.html_name }}" type="{{ field.field.widget.input_type }}"
+              class="py-2 px-3 text-gray-300 block w-full bg-gray-700 border-gray-600 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 {{ field.errors|yesno:'border-red-500,' }}"
+              {% if field.field.widget.attrs.placeholder %}placeholder="{{ field.field.widget.attrs.placeholder }}"{% endif %}
+              {% if field.value %}value="{{ field.value|stringformat:'s' }}"{% endif %}
+              {% for attr, value in field.field.widget.attrs.items %} {% if attr != 'placeholder' and attr != 'type' and attr != 'class' %}{{ attr }}="{{ value }}"{% endif %} {% endfor %}>
+          </div>
+            <div class="mb-4 text-red-500">
+              <p class="text-xs text-white">{{ field.errors }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        {% if form.non_field_errors %}
+        <div class="mb-4 text-red-500">
+          <p class="text-xs text-white">{{ form.non_field_errors }}</p>
+        </div>
+        {% endif %}
+        <div class="flex items-center justify-between">
+          <button type="submit"
+            class="w-full border text-gray-100 font-bold py-2 px-4 rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 transition duration-150 ease-in-out">
+            {% trans "Sign In" %}
+          </button>
+        </div>
+        <div class="mt-4 text-center">
+          <a href="{% url 'account_reset_password' %}"
+             class="inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-400">
+            {% trans "Forgot your password?" %}
+          </a>
+        </div>
+        <input type="hidden" name="next" value="{{ request.GET.next }}" />
+      </form>
+      
+      <p class="mt-4 text-center text-gray-300">
+        {% blocktrans %}Need an account? <a href="{{ signup_url }}" class="text-indigo-500 hover:text-indigo-400">Sign up!</a>{% endblocktrans %}
+      </p>
+      {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

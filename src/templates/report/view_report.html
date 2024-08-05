@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% load static %}
+{% block breadcrumb %}
+<nav class="flex py-3 px-5 text-gray-700 bg-gray-600 shadow-lg" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        <li class="inline-flex items-center">
+            <a href="{% url 'canary:home' %}"
+                class="inline-flex items-center text-sm font-medium text-white hover:text-gray-200">
+                <svg aria-hidden="true" class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
+                    </path>
+                </svg>
+                Home
+            </a>
+        </li>
+        <li>
+            <div class="flex items-center">
+                <svg aria-hidden="true" class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clip-rule="evenodd"></path>
+                </svg>
+                <a href="{% url 'canary:dashboard' %}"
+                    class="ml-1 text-sm font-medium text-white hover:text-gray-200 md:ml-2">User Dashboard</a>
+            </div>
+        </li>
+        <li>
+            <div class="flex items-center">
+                <svg aria-hidden="true" class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clip-rule="evenodd"></path>
+                </svg>
+                <a href="{% url 'communities:dashboard' community_id %}"
+                    class="ml-1 text-sm font-medium text-indigo-400 hover:text-gray-200 md:ml-2">Community Dashboard</a>
+            </div>
+        </li>
+    </ol>
+</nav>
+{% endblock breadcrumb %}
+{% block content %}
+    <div class="bg-gray-900 mt-4 flex items-center justify-center">
+        <div class="w-full max-w-4xl bg-gray-800 shadow-md rounded-lg overflow-hidden">
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-100">{{ report.title }}</h2>
+                    {% if is_admin %}
+                        <form method="post"
+                              action="{% url 'communities:edit_report' community.id report.id %}">
+                            {% csrf_token %}
+                            <select name="status"
+                                    class="py-2 px-3 text-gray-300 bg-gray-700 border-gray-600 rounded-md focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                                {% for status in report.Status.choices %}
+                                    <option value="{{ status.0 }}"
+                                            {% if report.status == status.0 %}selected{% endif %}>
+                                        {{ status.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit"
+                                    class="bg-indigo-400 text-white px-4 py-2 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition duration-150 ease-in-out ml-4">
+                                Update
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="px-3 py-1 rounded-full text-xs font-medium {% if report.status == 'open' %}bg-green-500 text-white{% elif report.status == 'in_progress' %}bg-yellow-500 text-white{% else %}bg-red-500 text-white{% endif %}">
+                            {{ report.get_status_display }}
+                        </span>
+                    {% endif %}
+                </div>
+                <p class="text-gray-300 mb-6">{{ report.content }}</p>
+                <div class="bg-gray-700 rounded-lg p-4 mb-6">
+                    <h6 class="text-lg font-semibold text-gray-100 mb-2">Report Details</h6>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-400 mb-1">Resolution Method:</p>
+                            <p class="text-gray-300">{{ report.get_resolution_method_display }}</p>
+                        </div>
+                        {% if report.author %}
+                            <div>
+                                <p class="text-gray-400 mb-1">Submitted by:</p>
+                                <p class="text-gray-300">{{ report.author }} ({{ report.author.email }})</p>
+                            </div>
+                        {% else %}
+                            <div>
+                                <p class="text-gray-400 mb-1">Submitted:</p>
+                                <p class="text-gray-300">Anonymously</p>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="text-gray-400 mb-1">Created at:</p>
+                            <p class="text-gray-300">{{ report.created_at }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 mb-1">Updated at:</p>
+                            <p class="text-gray-300">{{ report.updated_at }}</p>
+                        </div>
+                    </div>
+                </div>
+                <h6 class="text-lg font-semibold text-gray-100 mb-2">Media Files:</h6>
+                {% if media %}
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                        {% for media_file in media %}
+                            <div class="bg-gray-700 rounded-lg p-4">
+                                <a href="{{ media_file.file.url }}"
+                                   target="_blank"
+                                   class="text-indigo-500 hover:text-indigo-400">{{ media_file.file.name  | slice:"8:" }}</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-300 mb-6">No media files attached to this report.</p>
+                {% endif %}
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <h6 class="text-lg font-semibold text-gray-100 mb-2">Response</h6>
+                    {% if is_admin %}
+                        <form method="post"
+                              action="{% url 'communities:edit_report' community.id report.id %}"
+                              class="mt-2">
+                            {% csrf_token %}
+                            <textarea name="notes"
+                                      class="w-full h-40 border border-gray-600 rounded-md px-4 py-2 resize-none bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                                      placeholder="Enter notes here...">{{ report.notes }}</textarea>
+                            <button type="submit"
+                                    class="mt-3 bg-indigo-400 text-white px-4 py-2 rounded-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Reply to Report
+                            </button>
+                        </form>
+                    {% else %}
+                        <p class="text-gray-300">{{ report.notes }}</p>
+                    {% endif %}
+                </div>
+                <div class="flex justify-between items-center mt-6">
+                    <a href="{% url 'communities:dashboard' community.id %}"
+                       class="bg-gray-700 text-gray-100 font-bold py-2 px-4 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-150 ease-in-out">Back
+                    to Community</a>
+                    {% if is_admin %}
+                        <div class="flex space-x-2">
+
+                            <a href="{% url 'communities:delete_report' community.id report.id %}"
+                               class="bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-150 ease-in-out">Close
+                            Report</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

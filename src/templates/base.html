@@ -1,0 +1,146 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}Canary{% endblock %}
+    </title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/canary.svg' %}">
+    <link href="{% static 'output.css' %}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@2.8.2/dist/alpine.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.0"></script>
+</head>
+
+<body class="flex flex-col min-h-screen bg-gray-900 text-color">
+    <header>
+        <nav class="bg-gray-800">
+            <div class="display-none m-auto h-[50px] w-full items-center justify-between px-6 md:flex max-w-[1200px]">
+                <div class="hidden md:flex items-center gap-2">
+                    <img src="{% static 'images/canary.svg' %}" alt="Canary Logo" width="30" height="30">
+                    {% if user.is_authenticated %}
+                    <a class="text-orange-800 text-lg font-semibold" href="{% url 'canary:dashboard' %}">Canary</a>
+                    {% else %}
+                    <a class="text-orange-800 text-lg font-semibold" href="/">Canary</a>
+                    {% endif %}
+
+                </div>
+                <div class="flex items-center gap-4">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'canary:notifications'%}">
+                        <div
+                            class="relative inline-flex items-center rounded-full border border-gray-600 hover:bg-orange-400 p-2">
+                            {% if notifications_count > 0 %}
+                            <span
+                                class="absolute top-0 right-0 h-4 w-4 rounded-full bg-red-600 text-white flex justify-center items-center text-xs">
+                                {% if notifications_count > 9 %}
+                                9+
+                                {% else %}
+                                {{ notifications_count }}
+                                {% endif %}
+                            </span>
+                            {% endif %}
+                            <svg class="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path
+                                    d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                            </svg>
+                        </div>
+                    </a>
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open" class="flex items-center focus:outline-none text-text-color">
+                            {{ user.username }}
+                            <svg fill="none" stroke="currentColor" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false"
+                            class="absolute right-0 mt-2 py-2 w-48 bg-gray-600 rounded-md shadow-xl z-20">
+                            <!-- href="{% url 'account_email' %}"
+                                class="block px-4 py-2 text-sm text-white hover:bg-gray-100 hover:text-gray-600">Change
+                                Email</-->
+                            <a href="{% url 'accounts:edit_profile' %}"
+                                class="block px-4 py-2 text-sm text-white hover:bg-gray-100 hover:text-gray-600">Edit
+                                Profile</a>
+                            <a href="{% url 'account_logout' %}"
+                                class="block px-4 py-2 text-sm text-white hover:bg-gray-100 hover:text-gray-600">Sign
+                                Out</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'account_login' %}"
+                        class="text-text-color px-4 py-2 hover:bg-orange-400 rounded">Login</a>
+                    <a href="{% url 'account_signup' %}"
+                        class="text-text-color px-4 py-2 hover:bg-orange-400 rounded">Sign up</a>
+                    <a href="{% url 'account_reset_password' %}"
+                        class="text-text-color px-4 py-2 hover:bg-orange-400 rounded">Forgot Password</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        {% block breadcrumb %}
+        {% endblock breadcrumb %}
+    </header>
+    <div class="bg-gray-900 mx-auto w-full flex-grow p-4 md:max-w-[888px] md:p-6 lg:max-w-screen-xl">
+        {% block body %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="toast border-t border-b border-blue-500 text-blue-700 px-4 py-3 bg-blue-50 animate-slideIn
+                    rounded-lg shadow-lg max-w-lg mx-auto mt-5" role="alert" data-toast-id="{{ forloop.counter }}">
+            <div class="flex justify-between items-center">
+                <strong class="font-bold">{% trans "Messages:" %}</strong>
+                <button type="button" class="toast-close text-blue-700" data-toast-id="{{ forloop.counter }}">
+                    <span class="text-2xl">&times;</span>
+                </button>
+            </div>
+            <ul class="list-disc pl-5 mt-2">
+                <li>{{ message }}</li>
+            </ul>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% block content %}
+        {% endblock content %}
+        {% block scripts %}
+        {% endblock scripts %}
+        {% endblock body %}
+        {% block extra_body %}
+        {% endblock extra_body %}
+    </div>
+    <script src="{% static 'tw-elements/js/tw-elements.umd.min.js' %}" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/index.min.js"></script>
+    <script>
+        document.addEventListener( 'DOMContentLoaded', ( event ) => {
+            document.querySelectorAll( '.toast-close' ).forEach( button => {
+                button.addEventListener( 'click', function ( e ) {
+                    const toastId = this.getAttribute( 'data-toast-id' );
+                    const toastElement = document.querySelector( `[data-toast-id="${toastId}"]` );
+                    if ( toastElement ) {
+                        toastElement.style.display = 'none';
+                    }
+                } );
+            } );
+        } );
+    </script>
+    <footer class="mt-auto bg-gray-800 shadow dark:bg-gray-800">
+        <div class="w-full mx-auto max-w-screen-xl p-4 md:flex md:items-center md:justify-between">
+            <span class="text-sm text-white sm:text-center dark:text-gray-400">© 2024 <a
+                    href="https://b17-s24-asd-f1f7ff7a2336.herokuapp.com/" class="hover:underline">Canary™</a>All Rights
+                Reserved.</span>
+            <span class="text-sm text-white"><a>Disclaimer: This is a class project and should not be used for
+                    real-world
+                    applications.</a></span>
+        </div>
+    </footer>
+</body>
+
+</html>
